@@ -1,0 +1,53 @@
+{
+  "appPolicies": {
+    "eula": "",
+    "policies": [
+      {
+        "locale": "en_US",
+        "policyText": "",
+        "policyURL": ""
+      }
+    ]
+  },
+  "identifier": "LATTICE_STOREKIT_CONFIG",
+  "nonRenewingSubscriptions": [],
+  "products": [],
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "lattice_pro_group",
+      "localizations": [],
+      "name": "Lattice Pro",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "0.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "lattice_pro_monthly_id",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "The full daily logic-grid archive, an expert grid each day, bigger grids, hints and themes.",
+              "displayName": "Lattice Pro",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "lattice_pro_monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Lattice Pro Monthly",
+          "subscriptionGroupID": "lattice_pro_group",
+          "type": "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}

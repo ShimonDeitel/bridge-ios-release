@@ -1,0 +1,88 @@
+{
+  "templates": [
+    {
+      "tier": "easy",
+      "text": "A box holds {a} pencils. You buy {b} boxes. How many pencils in total?",
+      "op": "multiply",
+      "aRange": [2, 9],
+      "bRange": [2, 6]
+    },
+    {
+      "tier": "easy",
+      "text": "You have {a} apples and pick {b} more. How many apples now?",
+      "op": "add",
+      "aRange": [3, 20],
+      "bRange": [2, 15]
+    },
+    {
+      "tier": "easy",
+      "text": "There are {a} birds on a wire. {b} fly away. How many remain?",
+      "op": "subtract",
+      "aRange": [8, 25],
+      "bRange": [1, 7]
+    },
+    {
+      "tier": "easy",
+      "text": "Share {a} stickers equally among {b} friends. How many each?",
+      "op": "divide",
+      "aRange": [4, 9],
+      "bRange": [2, 5]
+    },
+    {
+      "tier": "medium",
+      "text": "A shelf has {b} rows of {a} books. How many books in all?",
+      "op": "multiply",
+      "aRange": [4, 12],
+      "bRange": [3, 9]
+    },
+    {
+      "tier": "medium",
+      "text": "A train has {a} seats. {b} are empty. How many are taken?",
+      "op": "subtract",
+      "aRange": [30, 90],
+      "bRange": [5, 25]
+    },
+    {
+      "tier": "medium",
+      "text": "Tickets cost {a} each. You buy {b}. What is the total cost?",
+      "op": "multiply",
+      "aRange": [5, 15],
+      "bRange": [2, 8]
+    },
+    {
+      "tier": "medium",
+      "text": "Pour {a} liters of juice into {b} equal cups. Liters per cup?",
+      "op": "divide",
+      "aRange": [6, 12],
+      "bRange": [2, 6]
+    },
+    {
+      "tier": "hard",
+      "text": "A bakery makes {a} loaves a day. How many in {b} days?",
+      "op": "multiply",
+      "aRange": [12, 25],
+      "bRange": [4, 12]
+    },
+    {
+      "tier": "hard",
+      "text": "Split {a} marbles into bags of {b}. How many full bags?",
+      "op": "divide",
+      "aRange": [8, 12],
+      "bRange": [2, 9]
+    },
+    {
+      "tier": "hard",
+      "text": "A theater seats {a}. After {b} leave, how many stay?",
+      "op": "subtract",
+      "aRange": [120, 300],
+      "bRange": [20, 90]
+    },
+    {
+      "tier": "hard",
+      "text": "Each crate weighs {a} kg. Find the weight of {b} crates.",
+      "op": "multiply",
+      "aRange": [11, 19],
+      "bRange": [6, 14]
+    }
+  ]
+}
