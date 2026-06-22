@@ -24,7 +24,7 @@ targets:
       - path: Shared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.shimondeitel.lattice
+        PRODUCT_BUNDLE_IDENTIFIER: com.shimondeitel.bridge
         TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_FILE: QuickMath/Info.plist
         CODE_SIGN_ENTITLEMENTS: QuickMath/QuickMath.entitlements
@@ -42,7 +42,7 @@ targets:
       - target: QuickMath
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.shimondeitel.lattice.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.shimondeitel.bridge.tests
         GENERATE_INFOPLIST_FILE: "YES"
         TARGETED_DEVICE_FAMILY: "1"
 schemes:

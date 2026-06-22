@@ -11,7 +11,7 @@ struct ResultView: View {
     @EnvironmentObject var store: Store
 
     private var shareText: String {
-        "I cracked \(isExpert ? "the expert" : "today's") Lattice grid in \(timeString(seconds)) — \(streak)-day streak. One logic grid a day."
+        "I solved \(isExpert ? "the expert" : "today's") Bridge puzzle in \(timeString(seconds)) — \(streak)-day streak. One bridges puzzle a day."
     }
 
     var body: some View {
@@ -21,7 +21,7 @@ struct ResultView: View {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 50, weight: .semibold)).foregroundStyle(Color.qmCorrect)
                 Text("Solved!").font(.largeTitle.weight(.heavy))
-                Text(isExpert ? "Expert grid cracked." : "Today's grid cracked.")
+                Text(isExpert ? "Expert puzzle solved." : "Today's puzzle solved.")
                     .font(.subheadline).foregroundStyle(.secondary)
 
                 HStack(spacing: 12) {

@@ -28,7 +28,7 @@ struct HomeView: View {
                     .padding(.bottom, 24)
                 }
             }
-            .navigationTitle("Lattice")
+            .navigationTitle("Bridge")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -40,7 +40,7 @@ struct HomeView: View {
             }
             .tint(Color.qmAccent)
             .fullScreenCover(item: $active) { spec in
-                GridView(puzzle: spec.puzzle, isExpert: spec.isExpert)
+                BoardView(puzzle: spec.puzzle, isExpert: spec.isExpert)
             }
             .sheet(isPresented: $showSettings) { SettingsView() }
             .sheet(isPresented: $showPaywall) { PaywallView() }
@@ -63,12 +63,12 @@ struct HomeView: View {
     @ViewBuilder
     private var todayCard: some View {
         VStack(spacing: 16) {
-            Text("TODAY'S GRID")
+            Text("TODAY'S PUZZLE")
                 .font(.caption.weight(.semibold)).foregroundStyle(.secondary).tracking(1.5)
             if let p = appModel.today {
-                Text("\(p.rows.count) \(p.rowCategory.lowercased())s · \(p.colCategory.lowercased())s")
+                Text("\(p.islands.count) islands · \(p.w)×\(p.h)")
                     .font(.headline)
-                Text("Read the clues. Cross out what can't be, mark what must be.")
+                Text("Connect every island with bridges so each number is matched.")
                     .font(.footnote).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 if appModel.solvedToday {
@@ -80,7 +80,7 @@ struct HomeView: View {
                     .softButton()
                 } else {
                     Button { play(p, expert: false) } label: {
-                        Text("Solve Today's Grid").frame(maxWidth: .infinity).padding(.vertical, 4)
+                        Text("Solve Today's Puzzle").frame(maxWidth: .infinity).padding(.vertical, 4)
                     }
                     .prominentButton()
                 }
@@ -111,8 +111,8 @@ struct HomeView: View {
                     if let p = PuzzleBank.expertToday() { play(p, expert: true) }
                 } else { showPaywall = true }
             } label: {
-                proTile(icon: "brain.head.profile", title: "Expert grid",
-                        subtitle: store.isPro ? "A harder 6×6 grid, fresh daily" : "Pro", locked: !store.isPro)
+                proTile(icon: "brain.head.profile", title: "Expert puzzle",
+                        subtitle: store.isPro ? "A harder, bigger puzzle daily" : "Pro", locked: !store.isPro)
             }
             .buttonStyle(.plain)
 
@@ -120,7 +120,7 @@ struct HomeView: View {
                 Haptics.tap()
                 if store.isPro { showArchive = true } else { showPaywall = true }
             } label: {
-                proTile(icon: "calendar", title: "Past grids",
+                proTile(icon: "calendar", title: "Past puzzles",
                         subtitle: store.isPro ? "Replay every previous day" : "Pro", locked: !store.isPro)
             }
             .buttonStyle(.plain)

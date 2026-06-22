@@ -9,7 +9,7 @@
       }
     ]
   },
-  "identifier": "LATTICE_STOREKIT_CONFIG",
+  "identifier": "BRIDGE_STOREKIT_CONFIG",
   "nonRenewingSubscriptions": [],
   "products": [],
   "settings": {
@@ -18,9 +18,9 @@
   },
   "subscriptionGroups": [
     {
-      "id": "lattice_pro_group",
+      "id": "bridge_pro_group",
       "localizations": [],
-      "name": "Lattice Pro",
+      "name": "Bridge Pro",
       "subscriptions": [
         {
           "adHocOffers": [],
@@ -28,19 +28,19 @@
           "displayPrice": "0.99",
           "familyShareable": false,
           "groupNumber": 1,
-          "internalID": "lattice_pro_monthly_id",
+          "internalID": "bridge_pro_monthly_id",
           "introductoryOffer": null,
           "localizations": [
             {
-              "description": "The full daily logic-grid archive, an expert grid each day, bigger grids, hints and themes.",
-              "displayName": "Lattice Pro",
+              "description": "The full daily bridges-puzzle archive, an expert puzzle each day, bigger boards, hints and themes.",
+              "displayName": "Bridge Pro",
               "locale": "en_US"
             }
           ],
-          "productID": "lattice_pro_monthly",
+          "productID": "bridge_pro_monthly",
           "recurringSubscriptionPeriod": "P1M",
-          "referenceName": "Lattice Pro Monthly",
-          "subscriptionGroupID": "lattice_pro_group",
+          "referenceName": "Bridge Pro Monthly",
+          "subscriptionGroupID": "bridge_pro_group",
           "type": "RecurringSubscription"
         }
       ]

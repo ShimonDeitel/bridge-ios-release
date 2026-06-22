@@ -16,7 +16,7 @@ struct SettingsView: View {
 
     private var version: String {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-        return "Lattice \(v)"
+        return "Bridge \(v)"
     }
 
     private var reminderTime: Binding<Date> {
@@ -58,13 +58,13 @@ struct SettingsView: View {
         Section {
             if store.isPro {
                 HStack {
-                    Label("Lattice Pro", systemImage: "sparkles")
+                    Label("Bridge Pro", systemImage: "sparkles")
                     Spacer(); Text("Active").foregroundStyle(.secondary)
                 }
             } else {
                 Button { Haptics.tap(); showPaywall = true } label: {
                     HStack {
-                        Label("Start Lattice Pro", systemImage: "sparkles")
+                        Label("Start Bridge Pro", systemImage: "sparkles")
                         Spacer(); Text("\(store.displayPrice)/mo").foregroundStyle(.secondary)
                     }
                 }
@@ -78,7 +78,7 @@ struct SettingsView: View {
             }
         } footer: {
             if !store.isPro {
-                Text("$0.99/month subscription. The expert daily grid, the full archive of past grids, hints and themes. Auto-renews until canceled.")
+                Text("$0.99/month subscription. The expert daily puzzle, the full archive of past puzzles, hints and themes. Auto-renews until canceled.")
             }
         }
     }
@@ -93,7 +93,7 @@ struct SettingsView: View {
     }
 
     private var gridSection: some View {
-        Section("Daily grid") {
+        Section("Daily puzzle") {
             Toggle("Daily reminder", isOn: $reminderOn)
                 .onChange(of: reminderOn) { _, on in
                     if on {
@@ -114,7 +114,7 @@ struct SettingsView: View {
         Section {
             Button("Erase Progress", role: .destructive) { showDeleteConfirm = true }
             Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
-            Link("Privacy Policy", destination: URL(string: "https://shimondeitel.github.io/lattice-site/privacy.html")!)
+            Link("Privacy Policy", destination: URL(string: "https://shimondeitel.github.io/bridge-site/privacy.html")!)
         } footer: {
             Text(version).frame(maxWidth: .infinity, alignment: .center).padding(.top, 4)
         }

@@ -23,13 +23,13 @@ struct ArchiveView: View {
                     .padding()
                 }
             }
-            .navigationTitle("Past Grids")
+            .navigationTitle("Past Puzzles")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() }.tint(Color.qmAccent) }
             }
             .fullScreenCover(item: $play) { spec in
-                GridView(puzzle: spec.puzzle, isExpert: false)
+                BoardView(puzzle: spec.puzzle, isExpert: false)
             }
         }
     }
@@ -46,7 +46,7 @@ struct ArchiveView: View {
                     .foregroundStyle(solved ? Color.qmCorrect : Color.secondary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(dateLabel(date)).font(.headline).foregroundStyle(.primary)
-                    Text("\(puzzle.rowCategory) · \(puzzle.colCategory)").font(.caption).foregroundStyle(.secondary)
+                    Text("\(puzzle.islands.count) islands · \(puzzle.w)×\(puzzle.h)").font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
                 Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)

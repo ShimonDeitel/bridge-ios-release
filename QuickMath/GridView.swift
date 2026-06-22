@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// The player: a one-to-one matching grid (people × an ordered attribute). Read the clues, tap
-/// cells to mark ✓ / ✗, and solve. Placing a ✓ auto-crosses the rest of its row and column.
-struct GridView: View {
+/// The player: tap between two islands to add a bridge (tap again for a double bridge, again to
+/// clear). Match every island's clue, keep all islands connected, and don't cross bridges.
+struct BoardView: View {
     let puzzle: Puzzle
     var isExpert: Bool = false
 
@@ -10,10 +10,9 @@ struct GridView: View {
     @EnvironmentObject var store: Store
     @Environment(\.dismiss) private var dismiss
 
-    @StateObject private var grid: GridState
+    @StateObject private var board: BridgeState
     @State private var elapsed = 0
     @State private var solved = false
-    @State private var wrongShake = false
     @State private var showResult = false
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -21,35 +20,25 @@ struct GridView: View {
     init(puzzle: Puzzle, isExpert: Bool = false) {
         self.puzzle = puzzle
         self.isExpert = isExpert
-        _grid = StateObject(wrappedValue: GridState(puzzle))
+        _board = StateObject(wrappedValue: BridgeState(puzzle))
     }
-
-    private var cell: CGFloat { puzzle.size >= 6 ? 38 : 44 }
-    private let nameW: CGFloat = 74
 
     var body: some View {
         NavigationStack {
             ZStack {
                 QMBackground()
                 ScrollView {
-                    VStack(spacing: 20) {
-                        timerBar
-                        gridBlock
-                            .modifier(Shake(animatableData: wrongShake ? 1 : 0))
-                        cluesCard
-                        if store.isPro {
-                            Button { Haptics.tap(); grid.revealHint(); evaluate() } label: {
-                                Label("Reveal a hint", systemImage: "lightbulb.fill")
-                                    .frame(maxWidth: .infinity).padding(.vertical, 2)
-                            }
-                            .softButton().disabled(solved)
-                        }
+                    VStack(spacing: 18) {
+                        statusBar
+                        boardCard
+                        legend
+                        controls
                     }
                     .padding()
                     .padding(.bottom, 30)
                 }
             }
-            .navigationTitle(isExpert ? "Expert Grid" : "Today's Grid")
+            .navigationTitle(isExpert ? "Expert Puzzle" : "Today's Puzzle")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -66,96 +55,136 @@ struct GridView: View {
         }
     }
 
-    private var timerBar: some View {
+    private var statusBar: some View {
         HStack {
-            Label(timeString(elapsed), systemImage: "clock").font(.subheadline.monospacedDigit())
-                .foregroundStyle(.secondary)
+            Label(timeString(elapsed), systemImage: "clock")
+                .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
             Spacer()
-            Text("\(grid.placedCount)/\(puzzle.size) placed").font(.subheadline).foregroundStyle(.secondary)
+            Text("\(board.placedIslands)/\(puzzle.islands.count) islands")
+                .font(.subheadline).foregroundStyle(.secondary)
         }
     }
 
-    private var gridBlock: some View {
-        VStack(spacing: 0) {
-            // Column headers
-            HStack(spacing: 0) {
-                Text(puzzle.colCategory).font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary).frame(width: nameW, height: 46, alignment: .trailing)
-                    .padding(.trailing, 4)
-                ForEach(0..<puzzle.size, id: \.self) { c in
-                    Text(puzzle.cols[c]).font(.system(size: 10, weight: .semibold))
-                        .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.6)
-                        .frame(width: cell, height: 46)
+    private var boardCard: some View {
+        GeometryReader { geo in
+            let cell = geo.size.width / CGFloat(puzzle.w)
+            ZStack(alignment: .topLeading) {
+                bridgeCanvas(cell: cell)
+                ForEach(board.links) { link in
+                    Color.clear
+                        .frame(width: cell * 0.66, height: cell * 0.66)
+                        .contentShape(Circle())
+                        .position(midpoint(link, cell))
+                        .onTapGesture {
+                            guard !solved else { return }
+                            Haptics.soft(); board.cycle(link.key); evaluate()
+                        }
+                }
+                ForEach(Array(puzzle.islands.enumerated()), id: \.offset) { i, _ in
+                    islandView(i, cell: cell)
+                        .position(center(i, cell))
+                        .allowsHitTesting(false)
                 }
             }
-            ForEach(0..<puzzle.size, id: \.self) { r in
-                HStack(spacing: 0) {
-                    Text(puzzle.rows[r]).font(.system(size: 12, weight: .medium))
-                        .lineLimit(1).minimumScaleFactor(0.6)
-                        .frame(width: nameW, height: cell, alignment: .trailing).padding(.trailing, 4)
-                    ForEach(0..<puzzle.size, id: \.self) { c in
-                        cellView(r, c)
-                    }
-                }
-            }
+            .frame(width: geo.size.width, height: cell * CGFloat(puzzle.h), alignment: .topLeading)
         }
-        .qmCard(cornerRadius: 16)
+        .aspectRatio(CGFloat(puzzle.w) / CGFloat(puzzle.h), contentMode: .fit)
+        .padding(8)
+        .qmCard(cornerRadius: 18)
     }
 
-    private func cellView(_ r: Int, _ c: Int) -> some View {
-        Button {
-            guard !solved else { return }
-            Haptics.soft(); grid.cycle(r, c); evaluate()
-        } label: {
-            ZStack {
-                Rectangle().fill(Color.qmCard2)
-                switch grid.marks[r][c] {
-                case .yes: Image(systemName: "checkmark").font(.system(size: cell * 0.42, weight: .bold)).foregroundStyle(Color.qmAccent)
-                case .no:  Image(systemName: "xmark").font(.system(size: cell * 0.34, weight: .semibold)).foregroundStyle(Color.secondary)
-                case .blank: Color.clear
+    private func bridgeCanvas(cell: CGFloat) -> some View {
+        Canvas { ctx, _ in
+            for link in board.links {
+                let cnt = board.counts[link.key] ?? 0
+                guard cnt > 0 else { continue }
+                let pa = center(link.a, cell)
+                let pb = center(link.b, cell)
+                let off: CGFloat = max(2.5, cell * 0.09)
+                let (dx, dy): (CGFloat, CGFloat) = link.horizontal ? (0, off) : (off, 0)
+                let lines: [CGFloat] = cnt == 2 ? [-1, 1] : [0]
+                for s in lines {
+                    var p = Path()
+                    p.move(to: CGPoint(x: pa.x + dx * s, y: pa.y + dy * s))
+                    p.addLine(to: CGPoint(x: pb.x + dx * s, y: pb.y + dy * s))
+                    ctx.stroke(p, with: .color(Color.qmAccent), lineWidth: max(2.5, cell * 0.07))
                 }
             }
-            .frame(width: cell, height: cell)
-            .overlay(Rectangle().stroke(Color.qmHair, lineWidth: 0.5))
         }
-        .buttonStyle(.plain)
     }
 
-    private var cluesCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("CLUES").font(.caption.weight(.semibold)).foregroundStyle(.secondary).tracking(1.5)
-            ForEach(Array(puzzle.clues.enumerated()), id: \.offset) { i, clue in
-                HStack(alignment: .top, spacing: 8) {
-                    Text("\(i + 1).").font(.subheadline.weight(.semibold)).foregroundStyle(Color.qmAccent)
-                    Text(clue).font(.subheadline).fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
+    private func islandView(_ i: Int, cell: CGFloat) -> some View {
+        let remaining = board.remaining(i)
+        let stroke: Color = remaining == 0 ? Color.qmCorrect : (remaining < 0 ? Color.qmWrong : Color.qmHair)
+        let d = cell * 0.78
+        return ZStack {
+            Circle().fill(Color(uiColor: .systemBackground))
+            Circle().strokeBorder(stroke, lineWidth: remaining == 0 ? 3 : 1.5)
+            Text("\(puzzle.islands[i].n)")
+                .font(.system(size: d * 0.5, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
+                .minimumScaleFactor(0.5)
+        }
+        .frame(width: d, height: d)
+    }
+
+    private var legend: some View {
+        Text("Tap between two islands to lay a bridge. Tap again for a double, once more to clear. Match every island's number, connect them all, and don't cross bridges.")
+            .font(.footnote).foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .qmCard()
+    }
+
+    @ViewBuilder
+    private var controls: some View {
+        VStack(spacing: 12) {
+            if store.isPro {
+                Button { Haptics.tap(); revealHint() } label: {
+                    Label("Reveal a bridge", systemImage: "lightbulb.fill")
+                        .frame(maxWidth: .infinity).padding(.vertical, 2)
                 }
+                .softButton().disabled(solved)
+            }
+            Button(role: .destructive) { Haptics.tap(); board.clear() } label: {
+                Label("Clear board", systemImage: "arrow.counterclockwise")
+                    .frame(maxWidth: .infinity).padding(.vertical, 2)
+            }
+            .softButton().disabled(solved)
+        }
+    }
+
+    /// Pro hint: place one correct bridge the player is still missing.
+    private func revealHint() {
+        for s in puzzle.solution {
+            let key = PairKey(s.a, s.b)
+            if (board.counts[key] ?? 0) != s.c {
+                board.counts[key] = s.c
+                board.objectWillChange.send()
+                evaluate()
+                return
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .qmCard()
     }
 
     private func evaluate() {
         guard !solved else { return }
-        if grid.isSolved {
+        if board.isSolved {
             solved = true
             Haptics.success()
             appModel.record(puzzle: puzzle, solved: true, seconds: Double(elapsed), isExpert: isExpert)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { showResult = true }
-        } else if grid.isComplete {
-            Haptics.warning()
-            withAnimation(.default) { wrongShake.toggle() }
         }
     }
 
-    private func timeString(_ s: Int) -> String { String(format: "%d:%02d", s / 60, s % 60) }
-}
-
-/// A small horizontal shake for a completed-but-wrong grid.
-struct Shake: GeometryEffect {
-    var animatableData: CGFloat
-    func effectValue(size: CGSize) -> ProjectionTransform {
-        ProjectionTransform(CGAffineTransform(translationX: 8 * sin(animatableData * .pi * 4), y: 0))
+    private func center(_ i: Int, _ cell: CGFloat) -> CGPoint {
+        CGPoint(x: (CGFloat(puzzle.islands[i].c) + 0.5) * cell,
+                y: (CGFloat(puzzle.islands[i].r) + 0.5) * cell)
     }
+
+    private func midpoint(_ link: Link, _ cell: CGFloat) -> CGPoint {
+        let pa = center(link.a, cell), pb = center(link.b, cell)
+        return CGPoint(x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2)
+    }
+
+    private func timeString(_ s: Int) -> String { String(format: "%d:%02d", s / 60, s % 60) }
 }

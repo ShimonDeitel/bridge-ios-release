@@ -23,7 +23,7 @@ final class AppModel: ObservableObject {
     }
 
     static func makeContainer() -> ModelContainer {
-        let schema = Schema([LatticeResult.self])
+        let schema = Schema([BridgeResult.self])
         let local = ModelConfiguration(schema: schema)
         if let c = try? ModelContainer(for: schema, configurations: local) { return c }
         let mem = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
@@ -37,19 +37,19 @@ final class AppModel: ObservableObject {
 
     func record(puzzle: Puzzle, solved: Bool, seconds: Double, isExpert: Bool) {
         let ctx = container.mainContext
-        ctx.insert(LatticeResult(dateKey: PuzzleBank.dateKey(), puzzleId: puzzle.id,
-                                 solved: solved, seconds: seconds, isExpert: isExpert))
+        ctx.insert(BridgeResult(dateKey: PuzzleBank.dateKey(), puzzleId: puzzle.id,
+                                solved: solved, seconds: seconds, isExpert: isExpert))
         try? ctx.save()
         refresh()
     }
 
-    func allResults() -> [LatticeResult] {
-        let d = FetchDescriptor<LatticeResult>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+    func allResults() -> [BridgeResult] {
+        let d = FetchDescriptor<BridgeResult>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         return (try? container.mainContext.fetch(d)) ?? []
     }
 
     /// The recorded daily result for a date key (ignores expert attempts).
-    func result(forKey key: String) -> LatticeResult? {
+    func result(forKey key: String) -> BridgeResult? {
         allResults().first { $0.dateKey == key && !$0.isExpert && $0.solved }
     }
 
