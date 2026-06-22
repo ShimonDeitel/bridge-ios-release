@@ -95,7 +95,7 @@ enum PuzzleBank {
 // MARK: - Play state
 
 /// A connectable island pair plus its orientation, derived once per puzzle.
-struct Link: Identifiable {
+struct Span: Identifiable {
     let a: Int
     let b: Int
     let horizontal: Bool
@@ -107,14 +107,14 @@ struct Link: Identifiable {
 /// with crossing-prevention and solve detection.
 final class BridgeState: ObservableObject {
     let puzzle: Puzzle
-    let links: [Link]
+    let links: [Span]
     private let solutionMap: [PairKey: Int]
 
     @Published var counts: [PairKey: Int] = [:]
 
     init(_ p: Puzzle) {
         puzzle = p
-        links = Self.computeLinks(p)
+        links = Self.computeSpans(p)
         var sol: [PairKey: Int] = [:]
         for s in p.solution { sol[PairKey(s.a, s.b)] = s.c }
         solutionMap = sol
@@ -122,7 +122,7 @@ final class BridgeState: ObservableObject {
 
     /// Connectable pairs: islands aligned in a row or column with no island between them. The
     /// solution's pairs are unioned in defensively so every required bridge is always placeable.
-    static func computeLinks(_ p: Puzzle) -> [Link] {
+    static func computeSpans(_ p: Puzzle) -> [Span] {
         let isl = p.islands
         let n = isl.count
         var found: [PairKey: Bool] = [:]   // key -> horizontal
@@ -145,11 +145,11 @@ final class BridgeState: ObservableObject {
             let k = PairKey(s.a, s.b)
             if found[k] == nil { found[k] = isl[s.a].r == isl[s.b].r }
         }
-        return found.map { Link(a: $0.key.a, b: $0.key.b, horizontal: $0.value) }
+        return found.map { Span(a: $0.key.a, b: $0.key.b, horizontal: $0.value) }
             .sorted { $0.id < $1.id }
     }
 
-    private func link(for key: PairKey) -> Link? { links.first { $0.key == key } }
+    private func link(for key: PairKey) -> Span? { links.first { $0.key == key } }
 
     /// Total bridge-ends currently connected to an island.
     func degree(_ island: Int) -> Int {
@@ -174,7 +174,7 @@ final class BridgeState: ObservableObject {
     }
 
     /// Does placing link `l` cross any existing perpendicular bridge?
-    private func wouldCross(_ l: Link) -> Bool {
+    private func wouldCross(_ l: Span) -> Bool {
         let isl = puzzle.islands
         let A = isl[l.a], B = isl[l.b]
         for other in links where (counts[other.key] ?? 0) > 0 {

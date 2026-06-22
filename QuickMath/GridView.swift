@@ -181,7 +181,7 @@ struct BoardView: View {
                 y: (CGFloat(puzzle.islands[i].r) + 0.5) * cell)
     }
 
-    private func midpoint(_ link: Link, _ cell: CGFloat) -> CGPoint {
+    private func midpoint(_ link: Span, _ cell: CGFloat) -> CGPoint {
         let pa = center(link.a, cell), pb = center(link.b, cell)
         return CGPoint(x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2)
     }
